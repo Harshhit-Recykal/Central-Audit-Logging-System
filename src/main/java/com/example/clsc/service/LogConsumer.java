@@ -14,5 +14,6 @@ public class LogConsumer {
     @RabbitListener(queues = ConfigConstants.QUEUE_NAME)
     public void receiveLog(AuditEvent message) {
         System.out.println("Received Log: " + message);
+
     }
 }
