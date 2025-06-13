@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class LogConsumer {
+public class AuditLogListener {
 
     private final AuditLogRepo auditLogRepo;
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public LogConsumer(AuditLogRepo auditLogRepo) {
+    public AuditLogListener(AuditLogRepo auditLogRepo) {
         this.auditLogRepo = auditLogRepo;
         this.objectMapper = new ObjectMapper();
     }
