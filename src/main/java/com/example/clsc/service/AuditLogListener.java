@@ -32,6 +32,7 @@ public class AuditLogListener {
         auditLog.setAction(ActionType.valueOf(message.getAction()));
         auditLog.setChangedAt(message.getTimestamp());
         auditLog.setChangedBy(message.getChangedBy());
+        auditLog.setEntityId(message.getEntityId());
 
         try {
             String rawJson = objectMapper.writeValueAsString(message.getRawDataAfter());
