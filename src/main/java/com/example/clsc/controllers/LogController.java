@@ -14,9 +14,12 @@ import java.util.List;
 @RequestMapping("api/logs")
 public class LogController {
 
-    @Autowired
+    private final AuditLogService auditLogService;
 
-    private AuditLogService auditLogService;
+    @Autowired
+    public LogController(AuditLogService auditLogService) {
+        this.auditLogService = auditLogService;
+    }
 
     @GetMapping("/all")
     public ApiResponse<List<AuditLog>> getAllAuditLogs() {

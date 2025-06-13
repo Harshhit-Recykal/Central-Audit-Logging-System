@@ -9,8 +9,13 @@ import java.util.List;
 
 @Service
 public class AuditLogService {
+
+    private final AuditLogRepo auditLogRepo;
+
     @Autowired
-    private AuditLogRepo auditLogRepo;
+    public AuditLogService(AuditLogRepo auditLogRepo) {
+        this.auditLogRepo = auditLogRepo;
+    }
 
     public List<AuditLog> getAllLogs() {
         return auditLogRepo.findAll();

@@ -12,11 +12,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class LogConsumer {
 
-    @Autowired
-    private AuditLogRepo auditLogRepo;
+    private final AuditLogRepo auditLogRepo;
+
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    public LogConsumer(AuditLogRepo auditLogRepo) {
+        this.auditLogRepo = auditLogRepo;
+        this.objectMapper = new ObjectMapper();
+    }
 
     @RabbitListener(queues = ConfigConstants.QUEUE_NAME)
     public void receiveLog(AuditEvent message) {
