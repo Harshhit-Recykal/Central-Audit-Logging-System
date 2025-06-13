@@ -42,7 +42,7 @@ public class AuditLog {
     private String rawDataBefore;
 
     @Lob
-    @Column(name = "raw_data_after")
+    @Column(name = "raw_data_after", columnDefinition = "TEXT")
     private String rawDataAfter;
 
 }
