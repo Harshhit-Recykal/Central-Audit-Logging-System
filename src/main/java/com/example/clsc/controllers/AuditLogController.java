@@ -12,12 +12,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/logs")
-public class LogController {
+public class AuditLogController {
 
     private final AuditLogService auditLogService;
 
     @Autowired
-    public LogController(AuditLogService auditLogService) {
+    public AuditLogController(AuditLogService auditLogService) {
         this.auditLogService = auditLogService;
     }
 
