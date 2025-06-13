@@ -14,11 +14,14 @@ import java.time.LocalDateTime;
 public class AuditLog {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "entity_name")
     private String entityName;
+
+    @Column(name = "entity_id")
+    private String entityId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "action")

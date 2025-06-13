@@ -24,7 +24,7 @@ public class LogConsumer {
 
         AuditLog auditLog = new AuditLog();
         auditLog.setEntityName(message.getEntityName());
-        auditLog.setRequestId(message.getEntityId());
+        auditLog.setEntityId(message.getEntityId());
         auditLog.setAction(ActionType.valueOf(message.getAction()));
         auditLog.setChangedAt(message.getTimestamp());
         auditLog.setChangedBy(message.getChangedBy());
