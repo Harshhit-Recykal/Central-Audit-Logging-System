@@ -4,10 +4,15 @@ import com.example.clsc.dto.AuditEvent;
 import com.example.clsc.entity.AuditLog;
 import com.example.clsc.enums.ActionType;
 import com.example.clsc.repository.AuditLogRepo;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuditLogListener {
@@ -35,10 +40,32 @@ public class AuditLogListener {
         auditLog.setEntityId(message.getEntityId());
 
         try {
-            String rawJson = objectMapper.writeValueAsString(message.getRawDataAfter());
-            auditLog.setRawDataAfter(rawJson);
+            String rawAfterJson = objectMapper.writeValueAsString(message.getRawDataAfter());
+            auditLog.setRawDataAfter(rawAfterJson);
+
+            Optional<AuditLog> previousLogOpt = auditLogRepo
+                    .findTopByEntityNameAndEntityIdOrderByChangedAtDesc(message.getEntityName(), message.getEntityId());
+
+            if (previousLogOpt.isPresent()) {
+                AuditLog previousLog = previousLogOpt.get();
+                auditLog.setRawDataBefore(previousLog.getRawDataAfter());
+
+                Map<String, Object> previousData = objectMapper.readValue(previousLog.getRawDataAfter(), new TypeReference<>() {});
+                Map<String, Object> currentData = objectMapper.readValue(rawAfterJson, new TypeReference<>() {});
+
+                Map<String, Object[]> fieldChanges = new HashMap<>();
+                for (String key : currentData.keySet()) {
+                    Object oldVal = previousData.get(key);
+                    Object newVal = currentData.get(key);
+                    if ((oldVal == null && newVal != null) || (oldVal != null && !oldVal.equals(newVal))) {
+                        fieldChanges.put(key, new Object[]{oldVal, newVal});
+                    }
+                }
+                auditLog.setFieldChanges(objectMapper.writeValueAsString(fieldChanges));
+            }
         } catch (Exception e) {
-            auditLog.setRawDataAfter("ERROR_CONVERTING_RAW_DATA");
+            auditLog.setRawDataBefore("ERROR_PROCESSING_DATA: " + e.getMessage());
+            auditLog.setRawDataAfter("ERROR_PROCESSING_DATA: " + e.getMessage());
         }
 
         auditLogRepo.save(auditLog);
