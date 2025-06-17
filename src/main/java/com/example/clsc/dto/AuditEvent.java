@@ -19,6 +19,7 @@ public class AuditEvent {
     private String action;
     private LocalDateTime timestamp;
     private String changedBy;
+    private String requestId;
     private Map<String, List<Object>> fieldChanges;
     private Object rawDataBefore;
     private Object rawDataAfter;

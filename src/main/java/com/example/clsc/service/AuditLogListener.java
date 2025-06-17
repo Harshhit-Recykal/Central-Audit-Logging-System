@@ -38,6 +38,7 @@ public void receiveLog(AuditEvent message) {
     auditLog.setAction(ActionType.valueOf(message.getAction()));
     auditLog.setChangedAt(message.getTimestamp());
     auditLog.setChangedBy(message.getChangedBy());
+    auditLog.setRequestId(message.getRequestId());
   //  auditLog.setRawDataAfter(message.getRawDataAfter().toString());
 
     try {
