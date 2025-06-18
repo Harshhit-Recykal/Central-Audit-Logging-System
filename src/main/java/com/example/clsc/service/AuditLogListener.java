@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.example.clsc.utils.CalculateJsonDiffs.findDiffs;
+
 @Service
 public class AuditLogListener {
 
@@ -39,7 +41,8 @@ public void receiveLog(AuditEvent message) {
     auditLog.setChangedAt(message.getTimestamp());
     auditLog.setChangedBy(message.getChangedBy());
     auditLog.setRequestId(message.getRequestId());
-  //  auditLog.setRawDataAfter(message.getRawDataAfter().toString());
+    auditLog.setRawDataAfter(message.getRawDataAfter().toString());
+
 
     try {
         String rawAfterJson = message.getRawDataAfter() != null
@@ -57,30 +60,20 @@ public void receiveLog(AuditEvent message) {
             if (previousLogOpt.isPresent()) {
                 AuditLog previousLog = previousLogOpt.get();
                 auditLog.setRawDataBefore(previousLog.getRawDataAfter());
-
+                Map<String ,Object> currentData = (Map<String ,Object>)message.getRawDataAfter();
                 Map<String, Object> previousData = objectMapper.readValue(
                         previousLog.getRawDataAfter(), new TypeReference<>() {}
-                );
-                Map<String, Object> currentData = (Map<String, Object>) message.getRawDataAfter();
-
-                Map<String, Object[]> fieldChanges = new HashMap<>();
-                for (String key : currentData.keySet()) {
-                    Object oldVal = previousData.get(key);
-                    Object newVal = currentData.get(key);
-                    if ((oldVal == null && newVal != null) || (oldVal != null && !oldVal.equals(newVal))) {
-                        fieldChanges.put(key, new Object[]{oldVal, newVal});
-                    }
-                }
+           );
+                Map<String, Object[]> fieldChanges =  findDiffs( currentData , previousData);
 
                 auditLog.setFieldChanges(objectMapper.writeValueAsString(fieldChanges));
             }
         }
-
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
         auditLog.setRawDataBefore("ERROR_PROCESSING_DATA: " + e.getMessage());
         auditLog.setRawDataAfter("ERROR_PROCESSING_DATA: " + e.getMessage());
     }
-
     auditLogRepo.save(auditLog);
     }
 }
