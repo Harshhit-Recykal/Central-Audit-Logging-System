@@ -37,11 +37,11 @@ public class AuditLog {
     private String requestId;
 
     @Lob
-    @Column(name = "field_changes")
+    @Column(name = "field_changes", columnDefinition = "TEXT")
     private String fieldChanges;
 
     @Lob
-    @Column(name = "raw_data_before")
+    @Column(name = "raw_data_before", columnDefinition = "TEXT")
     private String rawDataBefore;
 
     @Lob
