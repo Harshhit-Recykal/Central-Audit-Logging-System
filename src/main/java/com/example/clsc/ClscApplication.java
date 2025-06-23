@@ -14,20 +14,8 @@ import org.springframework.context.annotation.Bean;
 @EnableRabbit
 public class ClscApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ClscApplication.class, args);
-	}
-	@Bean
-	public ModelMapper modelMapper() {
-		return new ModelMapper();
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ClscApplication.class, args);
+    }
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		return mapper;
-	}
 }

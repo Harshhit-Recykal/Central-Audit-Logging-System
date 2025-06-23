@@ -24,7 +24,6 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-
     public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter());
