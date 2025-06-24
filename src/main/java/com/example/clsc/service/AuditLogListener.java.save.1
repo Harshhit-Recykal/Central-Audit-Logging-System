@@ -1,5 +1,4 @@
 package com.example.clsc.service;
-
 import com.example.clsc.constants.ConfigConstants;
 import com.example.clsc.dto.AuditEvent;
 import com.example.clsc.entity.AuditLog;
@@ -11,6 +10,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.View;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -18,10 +18,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.example.clsc.utils.CalculateJsonDiffs.findDiffs;
+import static com.example.clsc.utils.CalculateJsonDiffs.findDim
 
-@Service
-@SuppressWarnings("unchecked")
+
+
+
 public class AuditLogListener {
 
     private final AuditLogRepo auditLogRepo;
@@ -43,9 +44,6 @@ public class AuditLogListener {
 
             AuditLog auditLog = buildBaseLog(message);
 
-            /*
-            finding previous log for data validation ;
-             */
             Optional<AuditLog> previousLogOpt = auditLogRepo.findTopByEntityNameAndEntityIdOrderByChangedAtDesc(
                     message.getEntityName(), message.getEntityId());
 
@@ -69,7 +67,7 @@ public class AuditLogListener {
                     // Normal general diff case
 
                     if (prevUpdatedAt.isEqual(currUpdatedAt) || prevUpdatedAt.isAfter(currUpdatedAt)) {
-                        auditLog.setRawDataBefore(currentLogRawDataBefore);
+                        auditLog.setRawDataBefore(previousLogRawDataAfter);
                         auditLog.setFieldChanges(generateFieldChanges( previousLogRawDataAfter, (Map<String, Object>) message.getRawDataAfter()));
                     }
 
@@ -166,7 +164,5 @@ public class AuditLogListener {
         missing.setRawDataAfter(rawAfter);
         missing.setFieldChanges(generateFieldChanges(previousLog.getRawDataAfter(), (Map<String, Object>) message.getRawDataBefore()));
         return missing;
+       }
     }
-    }
-
-
