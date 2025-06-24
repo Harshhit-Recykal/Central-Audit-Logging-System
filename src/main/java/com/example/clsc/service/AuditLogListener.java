@@ -114,6 +114,7 @@ public class AuditLogListener {
         log.setChangedBy(message.getChangedBy());
         log.setRequestId(message.getRequestId());
         log.setRawDataAfter(objectMapper.writeValueAsString(message.getRawDataAfter()));
+        log.setRawDataBefore(objectMapper.writeValueAsString(message.getRawDataBefore()));
         return log;
     }
 
