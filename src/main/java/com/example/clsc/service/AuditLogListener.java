@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.View;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -60,7 +61,8 @@ public class AuditLogListener {
                         : null;
                 // extraction of timestamps
                 Object currentDataBefore = message.getRawDataBefore();
-                LocalDateTime prevUpdatedAt = extractUpdatedAt(objectMapper.readValue(previousLogRawDataAfter, new TypeReference<>() {}));
+                LocalDateTime prevUpdatedAt = extractUpdatedAt(objectMapper.readValue(previousLogRawDataAfter, new TypeReference<>() {
+                }));
                 LocalDateTime currUpdatedAt = extractUpdatedAt(message.getRawDataBefore());
                 System.out.println("prevUpdatedAt: " + prevUpdatedAt);
                 System.out.println("currUpdatedAt: " + currUpdatedAt);
@@ -70,10 +72,8 @@ public class AuditLogListener {
 
                     if (prevUpdatedAt.isEqual(currUpdatedAt) || prevUpdatedAt.isAfter(currUpdatedAt)) {
                         auditLog.setRawDataBefore(currentLogRawDataBefore);
-                        auditLog.setFieldChanges(generateFieldChanges( previousLogRawDataAfter, (Map<String, Object>) message.getRawDataAfter()));
-                    }
-
-                    else if(prevUpdatedAt.isBefore(currUpdatedAt) && currentDataBefore != null) {
+                        auditLog.setFieldChanges(generateFieldChanges(previousLogRawDataAfter, (Map<String, Object>) message.getRawDataAfter()));
+                    } else if (prevUpdatedAt.isBefore(currUpdatedAt) && currentDataBefore != null) {
                         // Missing log detected
                         AuditLog missingLog = createMissingAuditLog(message, previousLog);
                         missingLogRepo.save(missingLog);
@@ -86,9 +86,7 @@ public class AuditLogListener {
 
             }
             auditLogRepo.save(auditLog);
-        }
-
-        catch (Exception e) {
+        } catch (Exception e) {
             String error = "ERROR_PROCESSING_DATA: " + e.getMessage();
             AuditLog errorLog = new AuditLog();
             errorLog.setEntityName(message.getEntityName());
@@ -119,7 +117,8 @@ public class AuditLogListener {
     }
 
     private String generateFieldChanges(String oldJson, Map<String, Object> newData) throws Exception {
-        Map<String, Object> oldData = objectMapper.readValue(oldJson, new TypeReference<>() {});
+        Map<String, Object> oldData = objectMapper.readValue(oldJson, new TypeReference<>() {
+        });
         Map<String, Object[]> diffs = findDiffs(newData, oldData);
         return objectMapper.writeValueAsString(diffs);
     }
@@ -154,7 +153,7 @@ public class AuditLogListener {
     }
 
 
-    private AuditLog  createMissingAuditLog(AuditEvent message, AuditLog previousLog) throws Exception {
+    private AuditLog createMissingAuditLog(AuditEvent message, AuditLog previousLog) throws Exception {
         AuditLog missing = new AuditLog();
         missing.setEntityName(previousLog.getEntityName());
         missing.setEntityId(previousLog.getEntityId());
@@ -168,6 +167,6 @@ public class AuditLogListener {
         missing.setFieldChanges(generateFieldChanges(previousLog.getRawDataAfter(), (Map<String, Object>) message.getRawDataBefore()));
         return missing;
     }
-    }
+}
 
 
