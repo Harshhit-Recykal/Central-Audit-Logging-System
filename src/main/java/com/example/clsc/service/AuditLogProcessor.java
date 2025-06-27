@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.example.clsc.utils.DateTimeUtils.*;
 
 @Service
 public class AuditLogProcessor {
@@ -59,13 +59,13 @@ public class AuditLogProcessor {
                 ? objectMapper.writeValueAsString(message.getRawDataBefore())
                 : null;
 
-        LocalDateTime prevUpdatedAt = extractUpdatedAt(previousRawAfter);
-        LocalDateTime prevCreatedAt = extractCreatedAt(previousRawAfter);
-        LocalDateTime currUpdatedAt = extractUpdatedAt(currentRawBefore);
-        LocalDateTime currCreatedAt = extractCreatedAt(currentRawBefore);
+        LocalDateTime prevUpdatedAt = extractTimeStampFromJson(previousRawAfter, "updatedAt");
+        LocalDateTime prevCreatedAt = extractTimeStampFromJson(previousRawAfter, "createdAt");
+        LocalDateTime currUpdatedAt = extractTimeStampFromJson(currentRawBefore, "updatedAt");
+        LocalDateTime currCreatedAt = extractTimeStampFromJson(currentRawBefore, "createdAt");
 
-        if (Objects.nonNull(currCreatedAt) && Objects.nonNull(prevCreatedAt) && currCreatedAt.isEqual(prevCreatedAt)) {
-            if ((currUpdatedAt == null && prevUpdatedAt == null) ||compareTimestamps(prevUpdatedAt, currUpdatedAt) >= 0) {
+        if (areTimestampsEqual(currCreatedAt, prevCreatedAt)) {
+            if ((currUpdatedAt == null && prevUpdatedAt == null) || compareTimestamps(prevUpdatedAt, currUpdatedAt) >= 0) {
                 auditLog.setRawDataBefore(previousRawAfter);
                 auditLog.setFieldChanges(generateFieldChanges(previousRawAfter, message.getRawDataAfter()));
             } else {
@@ -76,7 +76,6 @@ public class AuditLogProcessor {
             }
         } else {
             logger.warn("Inconsistent createdAt timestamps: prevCreatedAt={}, currCreatedAt={}", prevCreatedAt, currCreatedAt);
-            // You may log, raise a metric, or store a partial log if needed
         }
     }
 
@@ -88,7 +87,7 @@ public class AuditLogProcessor {
         log.setRawDataBefore(rawBefore);
         log.setRawDataAfter(rawAfter);
 
-        if (extractUpdatedAt(rawBefore) == null) {
+        if (extractTimeStampFromJson(rawBefore, "updatedAt") == null) {
             log.setFieldChanges(generateFieldChanges(null, message.getRawDataAfter()));
         }
 
@@ -122,35 +121,6 @@ public class AuditLogProcessor {
         return objectMapper.writeValueAsString(diffs);
     }
 
-    private LocalDateTime extractUpdatedAt(String json) {
-        try {
-            if (json == null) return null;
-            Map<String, Object> map = objectMapper.readValue(json, new TypeReference<>() {});
-            Object updatedAt = map.get("updatedAt");
-            if (updatedAt instanceof LocalDateTime) return (LocalDateTime) updatedAt;
-            else if (updatedAt instanceof String) return LocalDateTime.parse((String) updatedAt);
-        } catch (DateTimeParseException e) {
-            logger.warn("Date parsing failed for updatedAt: {}", e.getMessage());
-        } catch (Exception e) {
-            logger.warn("Failed to extract updatedAt: {}", e.getMessage());
-        }
-        return null;
-    }
-
-    private LocalDateTime extractCreatedAt(String json) {
-        try {
-            if (json == null) return null;
-            Map<String, Object> map = objectMapper.readValue(json, new TypeReference<>() {});
-            Object createdAt = map.get("createdAt");
-            if (createdAt instanceof LocalDateTime) return (LocalDateTime) createdAt;
-            else if (createdAt instanceof String) return LocalDateTime.parse((String) createdAt);
-        } catch (DateTimeParseException e) {
-            logger.warn("Date parsing failed for createdAt: {}", e.getMessage());
-        } catch (Exception e) {
-            logger.warn("Failed to extract createdAt: {}", e.getMessage());
-        }
-        return null;
-    }
 
     private AuditLog createMissingAuditLog(AuditEvent message, AuditLog previousLog) throws Exception {
         AuditLog missing = new AuditLog();
@@ -168,8 +138,4 @@ public class AuditLogProcessor {
         return missing;
     }
 
-    private int compareTimestamps(LocalDateTime a, LocalDateTime b) {
-        if (a == null || b == null) return -2;
-        return a.compareTo(b);
-    }
 }
