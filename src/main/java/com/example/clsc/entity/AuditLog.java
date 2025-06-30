@@ -11,6 +11,35 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Table(name = "audit_log")
+
+@NamedStoredProcedureQuery(
+        name = "filter_audit_log",
+        procedureName = "filter_audit_log",
+        resultClasses = {AuditLog.class},
+        parameters = {
+                @StoredProcedureParameter(mode =
+                        ParameterMode.IN, name = "p_entity_name", type =
+                        String.class),
+                @StoredProcedureParameter(mode =
+                        ParameterMode.IN, name = "p_entity_id", type =
+                        String.class),
+                @StoredProcedureParameter(mode =
+                        ParameterMode.IN, name = "p_action", type =
+                        String.class),
+                @StoredProcedureParameter(mode =
+                ParameterMode.IN, name = "p_changed_by", type =
+                String.class),
+                @StoredProcedureParameter(mode =
+                        ParameterMode.IN, name = "p_changed_at", type =
+                        LocalDateTime.class),
+                @StoredProcedureParameter(mode =
+                        ParameterMode.IN, name = "p_page_number", type =
+                        Integer.class),
+                     @StoredProcedureParameter(mode =
+                ParameterMode.IN, name = "p_page_size", type =
+                Integer.class)
+        }
+)
 public class AuditLog {
 
     @Id
