@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "audit_log")
 
 @NamedStoredProcedureQuery(
-        name = "filter_audit_log",
-        procedureName = "filter_audit_log",
+        name = "filter_audit_logs",
+        procedureName = "filter_audit_logs",
         resultClasses = {AuditLog.class},
         parameters = {
                 @StoredProcedureParameter(mode =

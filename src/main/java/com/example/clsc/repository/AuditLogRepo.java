@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface AuditLogRepo extends JpaRepository<AuditLog, Long> {
     Optional<AuditLog> findTopByEntityNameAndEntityIdOrderByChangedAtDesc(String entityName, String entityId);
 
-    @Procedure(name = "filter_audit_log")
+    @Procedure(name = "filter_audit_logs")
     List<AuditLog> filterAuditLogs(
             @Param("p_entity_name")  String entityName,
             @Param("p_entity_id") String entityId,
