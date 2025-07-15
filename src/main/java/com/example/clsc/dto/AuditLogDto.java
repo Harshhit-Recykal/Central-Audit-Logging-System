@@ -13,7 +13,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuditEvent {
+public class AuditLogDto {
     private String entityName;
     private String entityId;
     private String action;

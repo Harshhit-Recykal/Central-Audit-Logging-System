@@ -1,7 +1,7 @@
 package com.example.clsc.service;
 
 import com.example.clsc.constants.ConfigConstants;
-import com.example.clsc.dto.AuditEvent;
+import com.example.clsc.dto.AuditLogDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -18,7 +18,7 @@ public class AuditLogListener {
     }
 
     @RabbitListener(queues = ConfigConstants.QUEUE_NAME)
-    public void receiveLog(AuditEvent message) {
+    public void receiveLog(AuditLogDto message) {
         logger.info("Received message from RabbitMQ with requestId: {}", message.getRequestId());
         auditLogProcessor.processAuditEvent(message);
     }
